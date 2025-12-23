@@ -1,6 +1,6 @@
 export const loadData = async (selectedEntity, API_BASE_URL, schema) => {
   try {
-    const config = schema?.record?.[selectedEntity];
+    const config = schema?.record?.[selectedEntity] || null;
     if (!config) return [];
 
     const response = await fetch(`${API_BASE_URL}${config.route}`);
