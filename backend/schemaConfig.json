@@ -1,0 +1,515 @@
+{
+  "record": {
+    "users": {
+      "route": "/api/users",
+      "backend": {
+        "schema": {
+          "id": {
+            "type": "Number",
+            "unique": true,
+            "index": true,
+            "sparse": true
+          },
+          "name": {
+            "type": "String",
+            "required": true,
+            "trim": true
+          },
+          "email": {
+            "type": "String",
+            "required": true,
+            "unique": true,
+            "lowercase": true
+          },
+          "phone": {
+            "type": "String",
+            "required": true
+          }
+        },
+        "options": {
+          "timestamps": true,
+          "strict": false
+        }
+      },
+      "frontend": {
+        "apiPath": "/users",
+        "fields": [
+          {
+            "name": "name",
+            "label": "Name",
+            "required": true,
+            "type": "text"
+          },
+          {
+            "name": "email",
+            "label": "Email",
+            "required": true,
+            "type": "email"
+          },
+          {
+            "name": "phone",
+            "label": "Phone",
+            "required": true,
+            "type": "text"
+          },
+          {
+            "name": "address",
+            "label": "Addresss",
+            "required": false,
+            "type": "textarea"
+          },
+          {
+            "name": "role",
+            "label": "Role",
+            "required": false,
+            "type": "dropdown",
+            "options": [
+              "admin",
+              "user"
+            ]
+          },
+          {
+            "name": "tags",
+            "label": "Tags",
+            "required": false,
+            "type": "tags",
+            "array": "true"
+          },
+          {
+            "name": "photo",
+            "label": "Photo",
+            "required": false,
+            "type": "imageLink"
+          },
+          {
+            "name": "materials",
+            "label": "Materials",
+            "required": false,
+            "type": "subString",
+            "subFields": [
+              {
+                "label": "Material",
+                "field": "material",
+                "type": "dropdown",
+                "api": "https://jsonbin.onrender.com/api/materials",
+                "apiTitle": "name"
+              },
+              {
+                "label": "Planned Qty",
+                "field": "planned",
+                "type": "number"
+              },
+              {
+                "label": "Achieved Qty",
+                "field": "achieved",
+                "type": "number"
+              }
+            ]
+          },
+          {
+            "name": "rating",
+            "label": "Rating",
+            "required": false,
+            "type": "rating",
+            "min": 1,
+            "max": 5
+          },
+          {
+            "name": "location",
+            "label": "Location",
+            "required": false,
+            "type": "geolocation"
+          },
+          {
+            "name": "apicall",
+            "label": "Apicall",
+            "type": "dropdown",
+            "api": "https://dummyjson.com/test",
+            "apiTitle": "dummy",
+            "options": [
+              "dummycall",
+              "hello"
+            ]
+          }
+        ],
+        "columns": [
+          {
+            "header": "ID",
+            "accessor": "id"
+          },
+          {
+            "header": "Name",
+            "accessor": "name"
+          },
+          {
+            "header": "Email",
+            "accessor": "email"
+          },
+          {
+            "header": "Phone",
+            "accessor": "phone"
+          },
+          {
+            "header": "Addresss",
+            "accessor": "address"
+          },
+          {
+            "header": "Material List",
+            "accessor": "materials",
+            "type": "subStringTable",
+            "subFields": [
+              {
+                "header": "Material",
+                "field": "material"
+              },
+              {
+                "header": "Planned Qty",
+                "field": "planned"
+              },
+              {
+                "header": "Achieved Qty",
+                "field": "achieved"
+              }
+            ]
+          },
+          {
+            "header": "Role",
+            "accessor": "role"
+          },
+          {
+            "header": "apicall",
+            "accessor": "Apicall"
+          }
+        ]
+      }
+    },
+    "categories": {
+      "route": "/api/categories",
+      "backend": {
+        "schema": {
+          "id": {
+            "type": "Number",
+            "unique": true,
+            "index": true,
+            "sparse": true
+          },
+          "name": {
+            "type": "String",
+            "required": true,
+            "trim": true
+          },
+          "description": {
+            "type": "String",
+            "default": ""
+          }
+        },
+        "options": {
+          "timestamps": true,
+          "strict": false
+        }
+      },
+      "frontend": {
+        "apiPath": "/categories",
+        "fields": [
+          {
+            "name": "name",
+            "label": "Category Name",
+            "required": true,
+            "type": "text"
+          },
+          {
+            "name": "description",
+            "label": "Description",
+            "required": false,
+            "type": "text"
+          }
+        ],
+        "columns": [
+          {
+            "header": "ID",
+            "accessor": "id"
+          },
+          {
+            "header": "Name",
+            "accessor": "name"
+          },
+          {
+            "header": "Description",
+            "accessor": "description"
+          }
+        ]
+      }
+    },
+    "products": {
+      "route": "/api/products",
+      "backend": {
+        "schema": {
+          "id": {
+            "type": "Number",
+            "unique": true,
+            "index": true,
+            "sparse": true
+          },
+          "name": {
+            "type": "String",
+            "required": true,
+            "trim": true
+          },
+          "categoryId": {
+            "type": "Number",
+            "required": true
+          },
+          "price": {
+            "type": "Number",
+            "required": true,
+            "min": 0
+          },
+          "stock": {
+            "type": "Number",
+            "required": true,
+            "min": 0
+          }
+        },
+        "options": {
+          "timestamps": true,
+          "strict": false
+        }
+      },
+      "frontend": {
+        "apiPath": "/products",
+        "fields": [
+          {
+            "name": "name",
+            "label": "Product Name",
+            "required": true,
+            "type": "text"
+          },
+          {
+            "name": "categoryId",
+            "label": "Category ID",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "name": "price",
+            "label": "Price",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "name": "stock",
+            "label": "Stock",
+            "required": true,
+            "type": "number"
+          }
+        ],
+        "columns": [
+          {
+            "header": "ID",
+            "accessor": "id"
+          },
+          {
+            "header": "Name",
+            "accessor": "name"
+          },
+          {
+            "header": "Category ID",
+            "accessor": "categoryId"
+          },
+          {
+            "header": "Price",
+            "accessor": "price"
+          },
+          {
+            "header": "Stock",
+            "accessor": "stock"
+          }
+        ]
+      }
+    },
+    "orders": {
+      "route": "/api/orders",
+      "backend": {
+        "schema": {
+          "orderId": {
+            "type": "String",
+            "required": true,
+            "unique": true,
+            "trim": true
+          },
+          "userId": {
+            "type": "Number",
+            "required": true
+          },
+          "productIds": [
+            {
+              "type": "Number",
+              "required": true
+            }
+          ],
+          "orderDate": {
+            "type": "Date",
+            "default": "Date.now"
+          },
+          "status": {
+            "type": "String",
+            "required": true,
+            "trim": true
+          }
+        },
+        "options": {
+          "timestamps": true,
+          "strict": false
+        }
+      },
+      "frontend": {
+        "apiPath": "/orders",
+        "fields": [
+          {
+            "name": "userId",
+            "label": "User ID",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "name": "productIds",
+            "label": "Product IDs (comma separated)",
+            "required": true,
+            "type": "text"
+          },
+          {
+            "name": "orderDate",
+            "label": "Order Date",
+            "required": true,
+            "type": "date"
+          },
+          {
+            "name": "status",
+            "label": "Status",
+            "required": true,
+            "type": "text"
+          }
+        ],
+        "columns": [
+          {
+            "header": "Order ID",
+            "accessor": "orderId"
+          },
+          {
+            "header": "User ID",
+            "accessor": "userId"
+          },
+          {
+            "header": "Product IDs",
+            "accessor": "productIds"
+          },
+          {
+            "header": "Order Date",
+            "accessor": "orderDate"
+          },
+          {
+            "header": "Status",
+            "accessor": "status"
+          }
+        ]
+      }
+    },
+    "coupons": {
+      "route": "/api/coupons",
+      "backend": {
+        "schema": {
+          "id": {
+            "type": "String",
+            "unique": true,
+            "trim": true
+          },
+          "code": {
+            "type": "String",
+            "required": true,
+            "unique": true,
+            "trim": true
+          },
+          "discount": {
+            "type": "Number",
+            "required": true,
+            "min": 0,
+            "max": 100
+          },
+          "isActive": {
+            "type": "Boolean",
+            "default": true
+          },
+          "validTill": {
+            "type": "Date"
+          }
+        },
+        "options": {
+          "timestamps": true,
+          "strict": false
+        }
+      },
+      "frontend": {
+        "apiPath": "/coupons",
+        "fields": [
+          {
+            "name": "id",
+            "label": "ID",
+            "required": true,
+            "type": "text"
+          },
+          {
+            "name": "code",
+            "label": "Coupon Code",
+            "required": true,
+            "type": "text"
+          },
+          {
+            "name": "discount",
+            "label": "Discount (%)",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "name": "isActive",
+            "label": "Active?",
+            "required": false,
+            "type": "checkbox"
+          },
+          {
+            "name": "validTill",
+            "label": "Valid Till",
+            "required": false,
+            "type": "date"
+          }
+        ],
+        "columns": [
+          {
+            "header": "ID",
+            "accessor": "id"
+          },
+          {
+            "header": "Code",
+            "accessor": "code"
+          },
+          {
+            "header": "Discount",
+            "accessor": "discount"
+          },
+          {
+            "header": "Active",
+            "accessor": "isActive"
+          },
+          {
+            "header": "Valid Till",
+            "accessor": "validTill"
+          }
+        ]
+      }
+    }
+  },
+  "metadata": {
+    "id": "69411118d0ea881f402cbde2",
+    "private": false,
+    "createdAt": "2025-12-16T07:58:16.375Z"
+  }
+}
