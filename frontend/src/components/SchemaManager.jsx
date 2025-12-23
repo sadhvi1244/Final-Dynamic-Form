@@ -62,7 +62,9 @@ const SchemaManager = ({
       } catch (backendError) {
         console.error("Backend update failed:", backendError);
         setBackendAvailable(false);
-        toast.warning("⚠️ Backend unavailable, updating frontend only");
+
+        // ✅ ONLY FIX — no UI change
+        toast.error("⚠️ Backend unavailable, updating frontend only");
       }
 
       // Update frontend schema
@@ -77,7 +79,6 @@ const SchemaManager = ({
       onClose();
       toast.success("🎉 Schema updated! Frontend regenerated successfully!");
 
-      // Refresh backend connection status
       if (checkBackendConnection) {
         checkBackendConnection();
       }
