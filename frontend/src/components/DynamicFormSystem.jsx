@@ -21,11 +21,25 @@ import SchemaManager from "./SchemaManager";
 import DataTable from "./DataTable";
 import EntityForm from "./EntityForm";
 
+// Safe JSON parse utility
+const safeJsonParse = (jsonString, fallback) => {
+  if (!jsonString || jsonString === "undefined" || jsonString === "null") {
+    return fallback;
+  }
+  try {
+    return JSON.parse(jsonString);
+  } catch (error) {
+    console.error("JSON Parse Error:", error);
+    return fallback;
+  }
+};
+
 const DynamicFormSystem = () => {
   const [schema, setSchema] = useState(() => {
     const stored = localStorage.getItem("dynamicSchema");
-    return stored ? JSON.parse(stored) : DEFAULT_SCHEMA;
+    return safeJsonParse(stored, DEFAULT_SCHEMA);
   });
+
   const [selectedEntity, setSelectedEntity] = useState("");
   const [data, setData] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -254,11 +268,11 @@ const DynamicFormSystem = () => {
     try {
       const response = await apiService.getSchema();
       if (response.success) {
-        setSchema(response.data);
-        localStorage.setItem("dynamicSchema", JSON.stringify(response.data));
+        setSchema(response.schema);
+        localStorage.setItem("dynamicSchema", JSON.stringify(response.schema));
 
         // Auto-select first entity
-        const entities = Object.keys(response.data.record);
+        const entities = Object.keys(response.schema.record || {});
         if (entities.length > 0) {
           setSelectedEntity(entities[0]);
         }
