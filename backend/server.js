@@ -129,7 +129,7 @@ const createModel = (entityName, config) => {
   for (const [key, val] of Object.entries(config.schema)) {
     // Handle array types properly
     if (Array.isArray(val)) {
-      fields[key] = val; // Keep array definition as-is
+      fields[key] = val;
       continue;
     }
 
@@ -165,11 +165,11 @@ const createModel = (entityName, config) => {
 
   const schema = new mongoose.Schema(fields, {
     timestamps: true,
-    strict: false, // Allow extra fields
+    strict: false,
   });
 
-  // Add pre-save hook for auto-generating IDs
-  schema.pre("save", async function (next) {
+  // FIXED: Add pre-save hook with proper async/await syntax
+  schema.pre("save", async function () {
     // Auto-generate orderId for orders
     if (modelName === "Orders" && !this.orderId) {
       this.orderId = `ORD-${Date.now()}-${Math.random()
@@ -179,11 +179,10 @@ const createModel = (entityName, config) => {
 
     // Auto-generate id if not exists and field is defined
     if (config.schema.id && !this.id && config.schema.id.type === "Number") {
-      const count = await this.constructor.countDocuments();
+      const Model = this.constructor;
+      const count = await Model.countDocuments();
       this.id = count + 1;
     }
-
-    next();
   });
 
   const model = mongoose.model(modelName, schema);
@@ -260,12 +259,10 @@ const createRoutes = (entity, config, Model) => {
       if (isMongoConnected && Model) {
         let record = null;
 
-        // Try MongoDB _id first
         if (mongoose.Types.ObjectId.isValid(req.params.id)) {
           record = await Model.findById(req.params.id).lean();
         }
 
-        // Try custom id field
         if (!record) {
           const numericId = !isNaN(req.params.id)
             ? parseInt(req.params.id)
@@ -273,7 +270,6 @@ const createRoutes = (entity, config, Model) => {
           record = await Model.findOne({ id: numericId }).lean();
         }
 
-        // Try orderId for orders
         if (!record && entity === "orders") {
           record = await Model.findOne({ orderId: req.params.id }).lean();
         }
@@ -338,10 +334,11 @@ const createRoutes = (entity, config, Model) => {
 
       // Handle validation errors
       if (error.name === "ValidationError") {
+        const details = Object.values(error.errors).map((e) => e.message);
         return res.status(400).json({
           success: false,
           error: "Validation error",
-          details: Object.values(error.errors).map((e) => e.message),
+          details: details,
         });
       }
 
@@ -371,7 +368,6 @@ const createRoutes = (entity, config, Model) => {
       if (isMongoConnected && Model) {
         let doc = null;
 
-        // Try MongoDB _id first
         if (mongoose.Types.ObjectId.isValid(req.params.id)) {
           doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
             new: true,
@@ -379,7 +375,6 @@ const createRoutes = (entity, config, Model) => {
           });
         }
 
-        // Try custom id field
         if (!doc) {
           const numericId = !isNaN(req.params.id)
             ? parseInt(req.params.id)
@@ -412,10 +407,11 @@ const createRoutes = (entity, config, Model) => {
       console.error(`❌ Error updating ${entity}:`, error);
 
       if (error.name === "ValidationError") {
+        const details = Object.values(error.errors).map((e) => e.message);
         return res.status(400).json({
           success: false,
           error: "Validation error",
-          details: Object.values(error.errors).map((e) => e.message),
+          details: details,
         });
       }
 
@@ -433,12 +429,10 @@ const createRoutes = (entity, config, Model) => {
       if (isMongoConnected && Model) {
         let doc = null;
 
-        // Try MongoDB _id first
         if (mongoose.Types.ObjectId.isValid(req.params.id)) {
           doc = await Model.findByIdAndDelete(req.params.id);
         }
 
-        // Try custom id field
         if (!doc) {
           const numericId = !isNaN(req.params.id)
             ? parseInt(req.params.id)

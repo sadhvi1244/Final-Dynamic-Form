@@ -198,8 +198,17 @@ const DynamicFormSystem = () => {
       fetchData(); // IMPORTANT: Refresh data after create/update
     } catch (error) {
       console.error("Error saving data:", error);
+
+      // Handle different error formats
       if (error.data?.details) {
-        toast.error(`Validation error: ${error.data.details.join(", ")}`);
+        // Check if details is an array
+        if (Array.isArray(error.data.details)) {
+          toast.error(`Validation error: ${error.data.details.join(", ")}`);
+        } else if (typeof error.data.details === "string") {
+          toast.error(`Error: ${error.data.details}`);
+        } else {
+          toast.error(error.data.error || "Validation error occurred");
+        }
       } else if (error.data?.error) {
         toast.error(error.data.error);
       } else {
