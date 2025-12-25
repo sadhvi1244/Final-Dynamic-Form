@@ -111,7 +111,7 @@ const loadSchema = () => {
 loadSchema();
 
 /* ============================================
-   DYNAMIC MODEL CREATOR - FIXED
+   DYNAMIC MODEL CREATOR - SIMPLIFIED (NO PRE-SAVE HOOKS)
 ============================================ */
 const modelCache = {};
 
@@ -168,23 +168,6 @@ const createModel = (entityName, config) => {
     strict: false,
   });
 
-  // FIXED: Add pre-save hook with proper async/await syntax
-  schema.pre("save", async function () {
-    // Auto-generate orderId for orders
-    if (modelName === "Orders" && !this.orderId) {
-      this.orderId = `ORD-${Date.now()}-${Math.random()
-        .toString(36)
-        .substr(2, 9)}`;
-    }
-
-    // Auto-generate id if not exists and field is defined
-    if (config.schema.id && !this.id && config.schema.id.type === "Number") {
-      const Model = this.constructor;
-      const count = await Model.countDocuments();
-      this.id = count + 1;
-    }
-  });
-
   const model = mongoose.model(modelName, schema);
   modelCache[modelName] = model;
 
@@ -194,7 +177,7 @@ const createModel = (entityName, config) => {
 };
 
 /* ============================================
-   ROUTE CREATOR - WITH COMPREHENSIVE ERROR HANDLING
+   ROUTE CREATOR - WITH ID GENERATION IN ROUTES
 ============================================ */
 const createRoutes = (entity, config, Model) => {
   const router = express.Router();
@@ -316,6 +299,23 @@ const createRoutes = (entity, config, Model) => {
             .filter((id) => !isNaN(id));
         }
 
+        // Generate orderId for orders if not provided
+        if (entity === "orders" && !req.body.orderId) {
+          req.body.orderId = `ORD-${Date.now()}-${Math.random()
+            .toString(36)
+            .substr(2, 9)}`;
+        }
+
+        // Generate numeric id if schema defines it and it's not provided
+        if (
+          config.schema.id &&
+          !req.body.id &&
+          config.schema.id.type === "Number"
+        ) {
+          const count = await Model.countDocuments();
+          req.body.id = count + 1;
+        }
+
         const doc = await Model.create(req.body);
         console.log(`✅ Created ${entity}:`, doc._id);
 
@@ -331,6 +331,7 @@ const createRoutes = (entity, config, Model) => {
       res.status(201).json({ success: true, data: item });
     } catch (error) {
       console.error(`❌ Error creating ${entity}:`, error);
+      console.error("Full error:", error);
 
       // Handle validation errors
       if (error.name === "ValidationError") {
